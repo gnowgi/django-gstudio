@@ -42,6 +42,7 @@ from django.core import serializers
 NODETYPE_CHOICES = (
     ('ND', 'Nodes'),
     ('ED', 'Edges'),
+    ('OB', 'Object'),
     ('NT', 'Node types'),
     ('ET', 'Edge types'),
     ('OT', 'Object types'),
@@ -58,6 +59,7 @@ NODETYPE_CHOICES = (
     ('IN', 'Intersection'),
     ('CP', 'Complement'),
     ('UN', 'Union'),
+
    )
 
 DEPTYPE_CHOICES = (
