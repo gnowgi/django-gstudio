@@ -41,7 +41,6 @@ from django.core import serializers
 
 NODETYPE_CHOICES = (
     ('ND', 'Nodes'),
-    ( 'OB' ,'Objects'),
     ('ED', 'Edges'),
     ('NT', 'Node types'),
     ('ET', 'Edge types'),
@@ -207,8 +206,15 @@ class Node(NID):
     plural = models.CharField(_('plural name'), help_text=_('plural form of the node name if any'), max_length=255, blank=True, null=True)
     rating = RatingField(range=5, can_change_vote = True, help_text=_('your rating'), blank=True, null=True)
 
+
     def __unicode__(self):
         return self.title
+
+    # def save(self):
+    #     if not self.id:
+    #         self.nbhood=self.get_nbh
+    #     super(Node,self).save()
+        
 
     class Meta:
         abstract=False
@@ -222,7 +228,7 @@ class Edge(NID):
     class Meta:
         abstract=False
 
- 
+
 class Metatype(Node):
     """
     Metatype object for Nodetype
@@ -248,7 +254,6 @@ class Metatype(Node):
         nbh['title'] = self.title
         nbh['altnames'] = self.altnames 
         nbh['plural'] = self.plural
-	
         if self.parent:
             nbh['typeof'] = self.parent
         # generate ids and names of children/members
@@ -355,7 +360,6 @@ class Metatype(Node):
         nbh['title'] = self.title
         nbh['altnames'] = self.altnames
         nbh['plural'] = self.plural
-	
         if self.parent:
             nbh['typeof'] = self.parent
         # generate ids and names of children
@@ -367,7 +371,6 @@ class Metatype(Node):
         nbh['left_subjecttype_of'] = Relationtype.objects.filter(left_subjecttype=self.id)
         nbh['right_subjecttype_of'] = Relationtype.objects.filter(right_subjecttype=self.id)
         nbh['attributetypes'] = Attributetype.objects.filter(subjecttype=self.id)
-	
 
         return nbh
 
@@ -599,14 +602,25 @@ class Nodetype(Node):
                      
         return attrs
 
-    def get_graph_json(self):
 
-        predicate_id={"plural":"a1","altnames":"a2","contains_members":"a3","contains_subtypes":"a4"}
+    def get_graph_json(self):
+        
+        
+        # predicate_id={"plural":"a1","altnames":"a2","contains_members":"a3","contains_subtypes":"a4","prior_nodes":""}
 	g_json = {}
 	g_json["node_metadata"]= [] 
-	
+
 	
 	nbh = self.get_nbh
+	predicate_id = {}
+        counter = 1
+        for key in nbh.keys():
+            val = "a" + str(counter)
+            predicate_id[key] = val
+            counter = counter + 1
+        print predicate_id
+
+        
 	
         this_node = {"_id":str(self.id),"title":self.title,"screen_name":self.title, "url":self.get_absolute_url()}
 	for key in predicate_id.keys():
@@ -621,18 +635,19 @@ class Nodetype(Node):
 						g_json["node_metadata"].append({"_id":str(item.id),"screen_name":item.title, "title":item.title, "url":item.get_absolute_url()})
 						g_json[str(key)].append({"from":predicate_id[key] , "to":item.id ,"value":1  })
 			
-				else:
-					value={nbh["plural"]:"a4",nbh["altnames"]:"a5"}			
-		            		this_node[str(key)]=nbh[key]
+				# else:
+				# 	value={nbh["plural"]:"a4",nbh["altnames"]:"a5"}			
+		            	# 	this_node[str(key)]=nbh[key]
 				
-					for item in value.keys():
-						g_json["node_metadata"].append({"_id":str(value[nbh[key]]),"screen_name":nbh[key]})
-						g_json[str(key)].append({"from":predicate_id[key] , "to":value[nbh[key]] ,"value":1  })
+				# 	for item in value.keys():
+				# 		g_json["node_metadata"].append({"_id":str(value[nbh[key]]),"screen_name":nbh[key]})
+				# 		g_json[str(key)].append({"from":predicate_id[key] , "to":value[nbh[key]] ,"value":1  })
 				
 			
 			except:
 		                    pass
 	g_json["node_metadata"].append(this_node)      
+        print g_json
         return json.dumps(g_json)   
 
 
@@ -897,11 +912,7 @@ class Objecttype(Nodetype):
     def __unicode__(self):
         return self.title
 
-    #def get_graph_json(self):
-	
-	
-
-                    
+                     
     @property
     def get_attributetypes(self):        
         return self.subjecttype_of.all()
@@ -1002,6 +1013,12 @@ class Objecttype(Nodetype):
 	nbh['authors'] = self.authors.all()
 
 	return nbh
+
+    # def save(self):
+    #     nbhood=self.get_nbh
+    #     self.save_m2m()
+    #     self.save()
+
     
     @property
     def get_rendered_nbh1(self):
@@ -1054,9 +1071,8 @@ class Objecttype(Nodetype):
             author_list.append('<a href="%s"></a>' % (each.get_absolute_url()))
         nbh['authors'] = author_list
         return nbh
-
-
-
+    
+ 
     class Meta:
         """
         object type's meta class
@@ -1158,7 +1174,7 @@ class Relation(Edge):
     '''
 
     left_subject_scope = models.CharField(max_length=50, verbose_name='subject scope or qualification', null=True, blank=True)
-    left_subject = models.ForeignKey(NID, related_name="left_subject_of", verbose_name='subject name') 
+    left_subject = models.ForeignKey(NID, related_name="left_subject_of", verbose_name='subject name' ) 
     relationtype_scope = models.CharField(max_length=50, verbose_name='relation scope or qualification', null=True, blank=True)
     relationtype = models.ForeignKey(Relationtype, verbose_name='relation name')
     right_subject_scope = models.CharField(max_length=50, verbose_name='object scope or qualification', null=True, blank=True)
@@ -1170,8 +1186,6 @@ class Relation(Edge):
         
         if choice == 'ED':
             nodeslist = Edge.objects.all()
-	if choice == 'OB':
-            nodeslist = Objects.objects.all()
         if choice == 'ND':
             nodeslist = Node.objects.all()
         if choice == 'NT':
@@ -1657,36 +1671,45 @@ class Intersection(Node):
     
 
 reversion.register(NID)
-reversion.register(Node)
-reversion.register(Objecttype)
-reversion.register(Edge)
+# reversion.register(Node)
+# reversion.register(Objecttype)
+# reversion.register(Edge)
 
 if not reversion.is_registered(Systemtype):
-    reversion.register(Systemtype)
+    reversion.register(Systemtype, follow=["nodetype_ptr"])
+
+if not reversion.is_registered(Node):
+    reversion.register(Node, follow=["nid_ptr"])
+
+if not reversion.is_registered(Edge):
+    reversion.register(Edge, follow=["nid_ptr"])
 
 if not reversion.is_registered(Processtype):
-    reversion.register(Processtype, follow=["changing_attributetype_set", "changing_relationtype_set"])
+    reversion.register(Processtype, follow=["nodetype_ptr", "changing_attributetype_set", "changing_relationtype_set"])
 
 if not reversion.is_registered(Nodetype): 
-    reversion.register(Nodetype, follow=["parent", "metatypes"])
+    reversion.register(Nodetype, follow=["node_ptr","parent", "metatypes"])
 
 if not reversion.is_registered(Metatype):
-    reversion.register(Metatype, follow=["parent"])
+    reversion.register(Metatype, follow=["node_ptr", "parent"])
 
 if not reversion.is_registered(Nodetype):
-    reversion.register(Nodetype, follow=["prior_nodes", "posterior_nodes"])
+    reversion.register(Nodetype, follow=["node_ptr", "prior_nodes", "posterior_nodes"])
+
+if not reversion.is_registered(Objecttype):
+    reversion.register(Objecttype, follow=["nodetype_ptr"])
 
 if not reversion.is_registered(Relationtype): 
-    reversion.register(Relationtype, follow=["left_subjecttype", "right_subjecttype"])
+    reversion.register(Relationtype, follow=["nodetype_ptr", "left_subjecttype", "right_subjecttype"])
 
 if not reversion.is_registered(Attributetype): 
-    reversion.register(Attributetype, follow=["subjecttype"])
+    reversion.register(Attributetype, follow=["nodetype_ptr", "subjecttype"])
 
 if not reversion.is_registered(Attribute): 
-    reversion.register(Attribute, follow=["subject", "attributetype"])
+    reversion.register(Attribute, follow=["edge_ptr", "subject", "attributetype"])
 
 if not reversion.is_registered(Relation): 
-    reversion.register(Relation, follow=["left_subject", "right_subject", "relationtype"])
+    reversion.register(Relation, follow=["edge_ptr", "left_subject", "right_subject", "relationtype"])
 
 moderator.register(Nodetype, NodetypeCommentModerator)
 mptt.register(Metatype, order_insertion_by=['title'])
