@@ -1,4 +1,7 @@
 This is a convenience package to test gstudio.
+Please follow the instructions below to setup gstudio 
+
+
 https://github.com/gnowgi/django-gstudio
 
 1. download git://github.com/gnowgi/django-gstudio.git

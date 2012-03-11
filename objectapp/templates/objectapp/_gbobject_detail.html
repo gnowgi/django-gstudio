@@ -51,6 +51,26 @@
                                     {% endfor %}<br/>
                            {% endif %}
 
+
+                            {% if object.get_rendered_nbh.priornodes %}
+                         
+                           
+                                <b>Prior nodes:<nbsp></b>
+                                    {% for mkey,mvalue in object.get_rendered_nbh.priornodes.items %}
+                                        <a href="{{mvalue}}">{{mkey}}</a>;
+                                    {% endfor %}<br/>
+                           {% endif %}
+                           
+                           {% if object.get_rendered_nbh.posteriornodes %}
+                         
+                           
+                                <b>Posterior nodes:<nbsp></b>
+                                    {% for mkey,mvalue in object.get_rendered_nbh.posteriornodes.items %}
+                                        <a href="{{mvalue}}">{{mkey}}</a>;
+                                    {% endfor %}<br/>
+                           {% endif %}
+
+
               {% if object.get_rendered_nbh.relations %}
                          
                          

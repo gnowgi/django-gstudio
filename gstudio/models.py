@@ -608,7 +608,7 @@ class Nodetype(Node):
     def get_graph_json(self):
         
         
-        # predicate_id={"plural":"a1","altnames":"a2","contains_members":"a3","contains_subtypes":"a4","prior_nodes":""}
+        # predicate_id={"plural":"a1","altnames":"a2","contains_members":"a3","contains_subtypes":"a4","prior_nodes":"a5", "posterior_nodes":"a6"}
 	g_json = {}
 	g_json["node_metadata"]= [] 
 

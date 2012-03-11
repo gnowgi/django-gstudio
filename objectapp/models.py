@@ -270,6 +270,23 @@ class Gbobject(Node):
         #return  all OTs the object is linked to
         nbh['member_of'] = self.objecttypes.all()
         
+        prior_nodes_list =[] 
+        temp = self.prior_nodes.all()             
+        for pn in temp:
+            # put the ot, at, rt instead of NT
+            prior_nodes_list.append(pn.ref)
+
+        nbh['prior_nodes'] = prior_nodes_list             
+
+        posterior_nodes_list =[] 
+        temp = self.posterior_nodes.all()             
+        for pn in temp:
+            # put the ot, at, rt instead of NT
+            posterior_nodes_list.append(pn.ref)
+
+        nbh['posterior_nodes'] = posterior_nodes_list 
+	nbh['authors'] = self.authors.all()
+        
         # get all the relations of the object    
         nbh.update(self.get_relations())
         nbh.update(self.get_attributes())
@@ -279,7 +296,7 @@ class Gbobject(Node):
     
     def get_graph_json(self):
 
-        predicate_id={"plural":"a1","altnames":"a2","member_of":"a3"}
+        predicate_id={"plural":"a1","altnames":"a2","member_of":"a3", "prior_nodes":"a4","posterior_nodes":"a5"}
 	g_json = {}
 	g_json["node_metadata"]= [] 
 	
@@ -394,6 +411,17 @@ class Gbobject(Node):
         for each in self.objecttypes.all():
             member_of_dict[each.title]= each.get_absolute_url()
         nbh['member_of']=member_of_dict
+
+        pnode_dict = {}
+        for each in self.prior_nodes.all():
+            pnode_dict[each.title]= each.get_absolute_url()
+        nbh['priornodes']=pnode_dict
+
+        pnode_dict = {}
+        for each in self.posterior_nodes.all():
+            pnode_dict[each.title]= each.get_absolute_url()
+        nbh['posteriornodes']=pnode_dict
+
         #get Relations
         relns={}
         rellft={}
@@ -429,6 +457,7 @@ class Gbobject(Node):
         nbh['relations']=relrgt
         nbh['relations'].update(rellft)
    
+
         #get Attributes
         attributes ={}
         for each in self.subject_of.all():
