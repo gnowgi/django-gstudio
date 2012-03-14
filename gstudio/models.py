@@ -620,7 +620,7 @@ class Nodetype(Node):
             val = "a" + str(counter)
             predicate_id[key] = val
             counter = counter + 1
-        print predicate_id
+
 
         
 	
@@ -637,13 +637,13 @@ class Nodetype(Node):
 						g_json["node_metadata"].append({"_id":str(item.id),"screen_name":item.title, "title":item.title, "url":item.get_absolute_url()})
 						g_json[str(key)].append({"from":predicate_id[key] , "to":item.id ,"value":1  })
 			
-				# else:
-				# 	value={nbh["plural"]:"a4",nbh["altnames"]:"a5"}			
-		            	# 	this_node[str(key)]=nbh[key]
+				else:
+					value={nbh["plural"]:"a4",nbh["altnames"]:"a5"}			
+		            		this_node[str(key)]=nbh[key]
 				
-				# 	for item in value.keys():
-				# 		g_json["node_metadata"].append({"_id":str(value[nbh[key]]),"screen_name":nbh[key]})
-				# 		g_json[str(key)].append({"from":predicate_id[key] , "to":value[nbh[key]] ,"value":1  })
+					for item in value.keys():
+						g_json["node_metadata"].append({"_id":str(value[nbh[key]]),"screen_name":nbh[key]})
+						g_json[str(key)].append({"from":predicate_id[key] , "to":value[nbh[key]] ,"value":1  })
 				
 			
 			except:
