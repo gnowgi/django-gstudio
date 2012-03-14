@@ -87,6 +87,7 @@ class Gbobject(Node):
                       (PUBLISHED, _('published')))
 
     content = models.TextField(_('content'), null=True, blank=True)
+    content_org = models.TextField(_('content'), null=True, blank=True)
     image = models.ImageField(_('image'), upload_to=UPLOAD_TO,
                               blank=True, help_text=_('used for illustration'))
 
@@ -277,7 +278,7 @@ class Gbobject(Node):
         return nbh
 
     
-    def get_graph_json(self):
+     def get_graph_json(self):
 
         predicate_id={"plural":"a1","altnames":"a2","member_of":"a3"}
 	g_json = {}
@@ -314,6 +315,7 @@ class Gbobject(Node):
         return json.dumps(g_json)   
 
 
+
     @property
     def get_relations1(self):
         """
@@ -328,21 +330,16 @@ class Gbobject(Node):
            	predicate=each.right_subject
            	predicate_values=[]
                 if reltype:
-              	   fl=0
               	   for key,value in reltype.items():
-                       if type(value) <> list:
-                          t=[]
-                          t.append(value)
-                          predicate_values=t
-                       else:
-                          predicate_values=value
+                       predicate_values=value
                        if each.relationtype.title==key:
-                          fl=1
                           predicate_values.append(predicate)
-                          reltype[key]=predicate_values             
-                   if fl==0:
-                       predicate_values=predicate
-                       reltype[relation]=predicate_values
+                          reltype[key]=predicate_values
+                          break
+                       else:
+                          predicate_values=predicate
+                          reltype[relation]=predicate_values
+                          break
                 else:
                     predicate_values.append(predicate)
                     reltype[relation]=predicate_values
@@ -356,23 +353,16 @@ class Gbobject(Node):
            	predicate=each.left_subject
                 predicate_values=[]
                 if reltype:
-                   fl=0
               	   for key,value in reltype.items():
-                       if type(value) <> list:
-                          t=[]
-                          t.append(value)
-                          prdicate_values=t
-                       else:
-                          predicate_values=value
+                       predicate_values=value
                        if each.relationtype.inverse==key:
-                          fl=1
                           predicate_values.append(predicate)
                           reltype[key]=predicate_values
-                          
-                   if fl==0:
-                       predicate_values=predicate
-                       reltype[relation]=predicate_values
-                          
+                          break
+                       else:
+                          predicate_values=predicate
+                          reltype[relation]=predicate_values
+                          break
                 else:
                    predicate_values.append(predicate)
                    reltype[relation]=predicate_values
@@ -635,7 +625,7 @@ if not reversion.is_registered(System):
     reversion.register(System, follow=["systemtypes", "gbobject_set", "relation_set", "attribute_set", "process_set", "system_set", "prior_nodes", "posterior_nodes"])
 
 if not reversion.is_registered(Gbobject):
-    reversion.register(Gbobject, follow=["objecttypes", "prior_nodes", "posterior_nodes"])
+    reversion.register(Gbobject, follow=["node_ptr","objecttypes", "prior_nodes", "posterior_nodes"])
 
 
 moderator.register(Gbobject, GbobjectCommentModerator)
